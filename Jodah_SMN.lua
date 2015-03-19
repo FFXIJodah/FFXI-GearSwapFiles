@@ -52,6 +52,8 @@ end
 function job_setup()
     state.Buff["Avatar's Favor"] = buffactive["Avatar's Favor"] or false
     state.Buff["Astral Conduit"] = buffactive["Astral Conduit"] or false
+	
+	state.NoTP = true or false
 
     spirits = S{"LightSpirit", "DarkSpirit", "FireSpirit", "EarthSpirit", "WaterSpirit", "AirSpirit", "IceSpirit", "ThunderSpirit"}
     avatars = S{"Carbuncle", "Fenrir", "Diabolos", "Ifrit", "Titan", "Leviathan", "Garuda", "Shiva", "Ramuh", "Odin", "Alexander", "Cait Sith"}
@@ -130,20 +132,182 @@ end
 
 -- Setup vars that are user-dependent.  Can override this function in a sidecar file.
 function user_setup()
-    state.OffenseMode:options('None', 'Normal', 'Acc')
+    state.OffenseMode:options('None', 'Normal', 'Acc', 'Att', 'Mix')
     state.CastingMode:options('Normal', 'Resistant')
-    state.IdleMode:options('Normal', 'PDT','Att','AFK')
-
-    gear.perp_staff = {name=""}
-    gear.Pet_MAcc_Legs = { name="Helios Spats", augments={'Pet: Mag. Acc.+30','Pet: Crit.hit rate +3','Summoning magic skill +6',}}
-	gear.Pet_PAcc_Legs = { name="Helios Spats", augments={'Pet: Accuracy+30 Pet: Rng. Acc.+30','Pet: Crit.hit rate +3','Blood Pact Dmg.+7',}}
-    gear.Pet_Regen_Body = { name="Telchine Chas.", augments={'Pet: "Mag.Atk.Bns."+19','Pet: "Regen"+3',}}
-	gear.Pet_Regen_Legs = { name="Telchine Braconi", augments={'Pet: Accuracy+11 Pet: Rng. Acc.+11','Pet: "Regen"+3',}}
-	gear.Pet_Siphon_Body ={ name="Telchine Chas.", augments={'Pet: Attack+6 Pet: Rng.Atk.+6','"Elemental Siphon"+35','MND+10',}}
-	gear.Pet_Siphon_Legs ={}
-	gear.Pet_MAtb_Head ={ name="Helios Band", augments={'Pet: "Mag.Atk.Bns."+29','Pet: Crit.hit rate +4','Pet: Haste+6',}}
-	select_default_macro_book()
+    state.IdleMode:options('Normal', 'PDT', 'Att','AFK','NoTP')
 	
+	--Lock top line to keep tp
+	send_command('gs disable Main')
+	send_command('gs disable Sub')
+	send_command('gs disable Range')
+	state.NoTP = false
+	
+	--Set gear to given Variables to make it easier to change them
+	--Perp Set
+    gear.Perp_Staff = "Nirvana" -- -8 Perp
+	gear.Perp_Sub = "Oneiros Grip" -- Latent Refresh 1 MP<75%
+	gear.Perp_Head = "Glyphic Horn +1" -- -4 Perp
+	gear.Perp_Body = "Hagondes Coat +1" -- -2 Perp
+	--gear.Perp_Hands = --Ultima 99 hands -1 in storage
+	gear.Perp_HandsWeather = "Caller's Bracers +2"
+	gear.Perp_Legs = "Assiduity Pants +1" -- -3 Perp
+	gear.Perp_Feet = "Convoker's Pigaches +1" -- -4 Perp
+	gear.Perp_Neck = "Caller's Pendant" -- -1 During Any Weather
+	
+	--Refresh Set
+	gear.Refresh_Club = "Bolelabunga" -- +1 Refresh +1 Regen
+	gear.Refresh_Shield = "Genbu's Shield" -- 
+	gear.Refresh_Staff = "Nirvana" -- Perp -8
+	gear.Refresh_Grip = "Oneiros Grip" -- +1 Regen Latent 1 Refresh @ <75% Base MP
+	gear.Refresh_Head = "Convoker's Horn +1" -- +2 Refresh
+	gear.Refresh_Body = "Hagondes Coat +1" -- +2 Refresh
+	gear.Refresh_Hands ="Serpentes Cuffs" -- Nighttime +1 Refresh
+	gear.Refresh_Legs = "Assiduity Pants +1" -- +1~2 Depending on Unity Rank
+	gear.Refresh_Feet = "Serpentes Sabots" -- Daytime +1 Refresh
+	gear.Refresh_RingToAU = "Balrahn's Ring" --1 Refresh in Assualts/Salvage
+	gear.Refresh_RingLegion = "Maquette Ring" --1 Refresh in Legion
+	
+	--Pet Magic Accuracy Set
+	gear.Pet_MAcc_Sub = "Vox Grip" -- +3 Smn. Magic
+	gear.Pet_MAcc_Head = "Convoker's Horn +1" -- Smn Magic +15
+	gear.Pet_MAcc_Body = "Anhur Robe" -- Smn Magic +12
+	gear.Pet_MAcc_Hands = "Glyphic Bracers +1" --Smn Magic +19
+    gear.Pet_MAcc_Legs = { name="Helios Spats", augments={'Pet: Mag. Acc.+30','Pet: Crit.hit rate +3','Summoning magic skill +6',}} -- Base MAcc +15/ BP Dmg +6
+	gear.Pet_MAcc_Feet = { name="Hagondes Sabots", augments={'Phys. dmg. taken -3%','Pet: Mag. Acc.+20',}} -- Base +25 MAtb 
+	gear.Pet_MAcc_Neck = "Caller's Pendant" -- Smn. Magic +9
+	gear.Pet_MAcc_Ear1 = "Andoaa Earring" -- +5Smn Magic
+	gear.Pet_MAcc_Ear2 = "Smn. Earring" -- +3Smn Magic
+	gear.Pet_MAcc_Ring1 = "Evoker's Ring" -- +10Smn Magic
+	gear.Pet_MAcc_Ring2 = "Fevor Ring" -- +4Smn Magic
+	gear.Pet_MAcc_Back = { name="Conveyance Cape", augments={'Summoning magic skill +4','Pet: Enmity+15','Blood Pact Dmg.+2','Blood Pact ab. del. II -2',}} -- Base +8Smn Magic
+	gear.Pet_MAcc_Waist = "Cimmerian Sash" -- +5Smn. Magic
+	
+	--Pet Physical Accuracy Set
+	gear.Pet_PAcc_Sub = "Vox Grip" -- +3Smn Magic
+	gear.Pet_PAcc_Head = "Convoker's Horn +1" -- Smn Magic +15
+	gear.Pet_PAcc_Body = "Anhur Robe" -- Smn Magic +12
+	gear.Pet_PAcc_Hands = "Glyphic Bracers +1" -- +28 Acc / Smn. Magic +19 
+	gear.Pet_PAcc_Legs = { name="Helios Spats", augments={'Pet: Accuracy+30 Pet: Rng. Acc.+30','Pet: Crit.hit rate +3','Blood Pact Dmg.+7',}}
+	gear.Pet_PAcc_Feet = { name="Helios Boots", augments={'Pet: Accuracy+28 Pet: Rng. Acc.+28','"Avatar perpetuation cost" -2','Pet: Haste+4',}}
+	gear.Pet_PAcc_Neck = "Caller's Pendant" -- Smn. Magic +9
+	gear.Pet_PAcc_Ear1 = "Andoaa Earring" -- +5Smn Magic
+	gear.Pet_PAcc_Ear2 = "Smn. Earring" -- +3Smn Magic
+	gear.Pet_PAcc_Ring1 = "Evoker's Ring" -- +10Smn Magic
+	gear.Pet_PAcc_Ring2 = "Fevor Ring" -- +4Smn Magic
+	gear.Pet_PAcc_Back = { name="Conveyance Cape", augments={'Summoning magic skill +4','Pet: Enmity+15','Blood Pact Dmg.+2','Blood Pact ab. del. II -2',}} -- Base +8Smn Magic
+	gear.Pet_PAcc_Waist = "Cimmerian Sash" -- +5Smn. Magic
+	
+	--Pet Regen Set
+	gear.Pet_Regen_Head = "Selenian Cap" -- -DT -10% Regen +1
+    gear.Pet_Regen_Body = { name="Telchine Chas.", augments={'Pet: "Mag.Atk.Bns."+19','Pet: "Regen"+3','Pet: Damage taken -2%',}}
+	gear.Pet_Regen_Hands ={ name="Telchine Gloves", augments={'Pet: Attack+14 Pet: Rng.Atk.+14','Pet: "Regen"+3',}}
+	gear.Pet_Regen_Legs = { name="Telchine Braconi", augments={'Pet: Accuracy+11 Pet: Rng. Acc.+11','Pet: "Regen"+3',}}
+	gear.Pet_Regen_Feet = "Convoker's Pigaches +1" -- Perp -4 Eva +20
+	gear.Pet_Regen_Waist = "Isa Belt" --Eva +10 Regen +1 DT -3%
+	
+	--Elemental Siphon Set
+	gear.Pet_Siphon_Head = "Convoker's Horn +1"
+	gear.Pet_Siphon_Body ={ name="Telchine Chas.", augments={'Pet: Attack+6 Pet: Rng.Atk.+6','"Elemental Siphon"+35','Pet: Damage taken -4%',}}
+	gear.Pet_Siphon_Hands = "Glyphic Bracers +1"
+	gear.Pet_Siphon_Legs ="Ngen Seraweels"
+	gear.Pet_Siphon_Feet = "Caller's Pigaches +2"
+	--gear.Pet_Siphon_Neck = "Caller's Pendant"
+	--gear.Pet_Siphon_Ear1 = {}
+	--gear.Pet_Siphon_Ear2 = {}
+	--gear.Pet_Siphon_Ring1 = {}
+	--gear.Pet_Siphon_Ring2 = {}
+	--gear.Pet_Siphon_Waist = {}
+	
+	--Pet Magic Attack Bonus Set
+	gear.Pet_MAtb_Head ={ name="Helios Band", augments={'Pet: "Mag.Atk.Bns."+29','Pet: Crit.hit rate +4','Blood Pact Dmg.+4',}}
+	gear.Pet_MAtb_Body = "Convoker's Doublet +1" -- BP Dmg +12
+	gear.Pet_MAtb_Hands = { name="Helios Gloves", augments={'Pet: "Mag.Atk.Bns."+21','"Blood Boon"+5','Blood Pact Dmg.+2',}}
+	gear.Pet_MAtb_Legs = { name="Helios Spats", augments={'Pet: Mag. Acc.+30','Pet: Crit.hit rate +3','Summoning magic skill +6',}}
+	gear.Pet_MAtb_Feet = { name="Hagondes Sabots", augments={'Phys. dmg. taken -3%','Pet: Mag. Acc.+20',}}
+	gear.Pet_MAtb_Neck = "Caller's Pendant" -- Smn. Magic +9
+	gear.Pet_MAtb_Ear1 = "Andoaa Earring" -- Smn. Magic +5
+	gear.Pet_MAtb_Ear2 = "Esper Earring" -- BPDmg +3%
+	gear.Pet_MAtb_Ring1 = "Evoker's Ring" -- +10Smn Magic
+	gear.Pet_MAtb_Ring2 = "Fevor Ring" -- +4Smn Magic
+	gear.Pet_MAtb_Back = { name="Conveyance Cape", augments={'Summoning magic skill +1','Blood Pact Dmg.+3','Blood Pact ab. del. II -3',}} -- Base +8Smn Magic BPDmg +3
+	gear.Pet_MAtb_Waist = "Cimmerian Sash" -- +5Smn. Magic
+	
+	--Pet Physical Attack Set
+	gear.Pet_PAtt_Head ={ name="Helios Band", augments={'Pet: "Mag.Atk.Bns."+29','Pet: Crit.hit rate +4','Blood Pact Dmg.+4',}} --BP Dmg +4 Crit Hit 4
+	gear.Pet_PAtt_Body = "Convoker's Doublet +1" -- BP Dmg +12
+	gear.Pet_PAtt_Hands = "Auspex Gages" --BPDmg +4% Att +9
+	gear.Pet_PAtt_Legs = { name="Helios Spats", augments={'Pet: Accuracy+30 Pet: Rng. Acc.+30','Pet: Crit.hit rate +3','Blood Pact Dmg.+7',}} --Base BP Dmg +6
+	gear.Pet_PAtt_Feet = "Convoker's Pigaches +1" --BP Dmg +6
+	gear.Pet_PAtt_Neck = "Sacrifice Torque" -- Att +3
+	gear.Pet_PAtt_Ear1 = "Esper Earring" -- BPDmg +3%
+	gear.Pet_PAtt_Ear2 = "Domes. Earring" -- DA +3%
+	gear.Pet_PAtt_Ring1 = "Evoker's Ring" -- +10Smn Magic
+	gear.Pet_PAtt_Ring2 = "Fevor Ring" -- +4Smn Magic
+	gear.Pet_PAtt_Back = { name="Conveyance Cape", augments={'Summoning magic skill +1','Blood Pact Dmg.+3','Blood Pact ab. del. II -3',}} -- Base +8Smn Magic BPDmg +3
+	gear.Pet_PAtt_Waist = "Mujin Obi" -- +10 Att
+	
+	--Summon Magic Set
+	gear.Pet_SmnMagic_Main = {}
+	gear.Pet_SmnMagic_Sub = "Vox Grip" -- +3Smn Magic
+	gear.Pet_SmnMagic_Head = "Convoker's Horn +1" -- +15Smn Magic
+	gear.Pet_SmnMagic_Body = "Anhur Robe" -- +12 Smn Magic
+	gear.Pet_SmnMagic_Hands = "Glyphic Bracers +1" -- +19 Smn Magic
+	gear.Pet_SmnMagic_Legs = "Ngen Seraweels" -- +10 Smn Magic
+	gear.Pet_SmnMagic_Feet = "Mdk. Crackows +1" -- +11 Smn Magic
+	gear.Pet_SmnMagic_Back = { name="Conveyance Cape", augments={'Summoning magic skill +4','Pet: Enmity+15','Blood Pact Dmg.+2','Blood Pact ab. del. II -2',}} -- +12 Smn Magic
+	gear.Pet_SmnMagic_Neck = "Caller's Pendant" -- +9Smn Magic
+	gear.Pet_SmnMagic_Waist = "Cimmerian Sash" -- +5Smn. Magic
+	gear.Pet_SmnMagic_Ear1 = "Andoaa Earring" -- +5Smn Magic
+	gear.Pet_SmnMagic_Ear2 = "Smn. Earring" -- +3Smn Magic
+	gear.Pet_SmnMagic_Ring1 = "Evoker's Ring" -- +10Smn Magic
+	gear.Pet_SmnMagic_Ring2 = "Fevor Ring" -- +4Smn Magic
+	
+	--BloodPact Reduction set 100Merit BP II -5 
+	gear.Pet_BPDelay_Ammo = "Seraphicaller" -- BP II -5
+	gear.Pet_BPDelay_Head = "Glyphic Horn +1" -- BP I -8
+	gear.Pet_BPDelay_Body = "Glyphic Doublet +1"-- BP II -2
+	gear.Pet_BPDelay_Hands = "Glyphic Bracers +1"-- BP I -6
+	gear.Pet_BPDelay_Legs = "Glyphic Spats +1"-- BP I -6
+	gear.Pet_BPDelay_Feet = "Glyph. Pigaches +1"-- BP II -1
+	gear.Pet_BPDelay_Back = { name="Conveyance Cape", augments={'Summoning magic skill +1','Blood Pact Dmg.+3','Blood Pact ab. del. II -3',}} -- BP II -3
+	gear.Pet_BPDelay_Ear1 = "Gifted Earring" --Making sure Esper Earring is not on
+	gear.Pet_BPDelay_Ear2 = "Loquacious Earring" --Making sure Esper Earring is not on
+	
+	--Fast Cast Set Max FC 40% / Max Spell Reduc 40%
+	gear.FastCast_Head ="Nahtirah Hat" -- +10% Fast Cast
+	gear.FastCast_Body = "Anhur Robe" -- +10% Fast Cast
+	gear.FastCast_Hands = { name="Otomi Gloves", augments={'Phys. dmg. taken -2%','Magic dmg. taken -2%','"Fast Cast"+3',}} -- 3% Fast Cast
+	gear.FastCast_Legs = "Artsieq Hose" -- 5% Fast Cast
+	gear.FastCast_Feet = { name="Uk'uxkaj Boots", augments={'Phys. dmg. taken -2%','Magic dmg. taken -2%','"Fast Cast"+3',}} -- 3% Fast Cast
+	gear.FastCast_Neck = "Caller's Pendant" -- +9Smn Magic
+	gear.FastCast_Back = "Swith Cape" -- 3% Fast Cast
+	gear.FastCast_Waist = "Witful Belt" -- 3% Fast Cast 3% Insta Cast
+	gear.FastCast_Ear1 = "Andoaa Earring" -- +5Smn Magic
+	gear.FastCast_Ear2 = "Loquacious Earring" -- +2% Fast Cast
+	gear.FastCast_Ring1 = "Evoker's Ring" -- +10Smn Magic
+	gear.FastCast_Ring2 = "Fevor Ring" -- +4Smn Magic
+	
+	--Magic Attack Bonus Set (GarlandOfBliss MND/STR + MAB)
+	gear.MAB_Head = "Buremte Hat" --MagDmg +35 / Base MND 24 / STR 20 Aug 8 MND
+	gear.MAB_Body = "Artsieq Jubbah" --Base +10MAB / Aug + 15MAB 19MND/STR18
+	gear.MAB_Hands = "Yaoyotl Gloves" -- MAB 15 33MND / 6STR
+	gear.MAB_Legs = "Hagondes Pants +1" --MAB 25 22MND / 23STR
+	gear.MAB_Feet = "Umbani Boots" --MAB 20 MDmg 10 19MND / 10STR
+	gear.MAB_Neck = "Eddy Necklace" --MAB11
+	gear.MAB_Ear1 = "Hecate's Earring" --MAB 6
+	gear.MAB_Ear2 = "Novio Earring" --MAB 7
+	gear.MAB_Ring1 = "Rajas Ring" -- STR 5
+	gear.MAB_Ring2 = "Shiva Ring" -- INT 8
+	gear.MAB_Back = "Pahtli Cape" -- MND 8
+	gear.MAB_Waist = "Sekhmet Corset" -- MDmg 15
+	
+	gear.Pet_BPDelay_Back = { name="Conveyance Cape", augments={'Summoning magic skill +1','Blood Pact Dmg.+3','Blood Pact ab. del. II -3',}} -- BP II -3
+	gear.Pet_BPDmg_Back = { name="Conveyance Cape", augments={'Summoning magic skill +4','Pet: Enmity+15','Blood Pact Dmg.+2','Blood Pact ab. del. II -2',}} --BP Dmg 2 Base SmnMagic 8 + 4Aug
+	gear.CapPoints_Back = {name="Mecisto. Mantle", augments={'Cap. Point+48%','HP+11','"Mag.Atk.Bns."+2','DEF+1',}}
+	gear.WakeUp_Neck = "Sacrifice Torque"
+	
+	select_default_macro_book()
+	 
 end
 
 
@@ -156,25 +320,27 @@ function init_gear_sets()
     -- Precast sets to enhance JAs
     sets.precast.JA['Astral Flow'] = {head="Glyphic Horn +1"}
     
-    sets.precast.JA['Elemental Siphon'] = {main="Nirvana", sub="Vox Grip",
-        head="Convoker's Horn +1",neck="Caller's Pendant",ear1="Andoaa Earring",ear2="Smn. Earring",
-        body=gear.Pet_Siphon_Body,hands="Glyphic Bracers +1",ring1="Evoker's Ring",ring2="Fervor Ring",
-        back="Conveyance Cape", waist="Cimmerian Sash",legs="Ngen Seraweels",feet="Caller's Pigaches +2"}
+    sets.precast.JA['Elemental Siphon'] = {main="Nirvana", sub=gear.Pet_SmnMagic_Sub,
+        head=gear.Pet_Siphon_Head, neck=gear.Pet_SmnMagic_Neck, ear1=gear.Pet_SmnMagic_Ear1, ear2=gear.Pet_SmnMagic_Ear2,
+        body=gear.Pet_Siphon_Body, hands=gear.Pet_Spihon_Hands, ring1=gear.Pet_SmnMagic_Ring1, ring2=gear.Pet_SmnMagic_Ring2,
+        back=gear.Pet_SmnMagic_Back, waist=gear.Pet_SmnMagic_Waist, legs=gear.Pet_Siphon_Legs, feet=gear.Pet_Siphon_Feet}
 
     sets.precast.JA['Mana Cede'] = {hands="Caller's Bracers +2"}
 
     -- Pact delay reduction gear
-    sets.precast.BloodPactWard = {ammo="Seraphicaller",head="Convoker's Horn +1",body="Glyphic Doublet +1",hands="Glyphic Bracers +1",
-        legs="Glyphic Spats +1", feet="Glyph. Pigaches +1",back="Conveyance Cape"}
+    sets.precast.BloodPactWard = {ammo=gear.Pet_BPDelay_Ammo,
+		head=gear.Pet_BPDelay_Head, ear1=gear.Pet_BPDelay_Ear1,ear2=gear.Pet_BPDelay_Ear2,
+		body=gear.Pet_BPDelay_Body, hands=gear.Pet_BPDelay_Hands,
+		legs=gear.Pet_BPDelay_Legs, feet=gear.Pet_BPDelay_Feet,back=gear.Pet_BPDelay_Back}
 
     sets.precast.BloodPactRage = sets.precast.BloodPactWard
 
     -- Fast cast sets for spells
     
     sets.precast.FC = {
-        head="Nahtirah Hat",ear2="Loquacious Earring",
-        body="Anhur Robe",hands="Otomi Gloves",ring1="Prolix Ring",
-        back="Swith Cape",waist="Witful Belt",legs="Artsieq Hose",feet="Chelona Boots +1"}
+        head=gear.FastCast_Head, neck=gear.FastCast_Neck, ear1=gear.FastCast_Ear1, ear2=gear.FastCast_Ear2,
+        body=gear.FastCast_Body, hands=gear.FastCast_Hands, ring1=gear.FastCast_Ring1, ring2=gear.FastCast_Ring2,
+        back=gear.FastCast_Back, waist=gear.FastCast_Waist, legs=gear.FastCast_Legs, feet=gear.FastCast_Feet}
 
     sets.precast.FC['Enhancing Magic'] = set_combine(sets.precast.FC, {waist="Siegel Sash"})
 	
@@ -186,44 +352,45 @@ function init_gear_sets()
     -- Weaponskill sets
     -- Default set for any weaponskill that isn't any more specifically defined
     sets.precast.WS = {
-        head="Nahtirah Hat",neck="Fotia Gorget",ear1="Bladeborn Earring",ear2="Steelflash Earring",
-        body="Hagondes Coat +1",hands="Glyphic Bracers +1",ring1="Rajas Ring",ring2="K'ayres Ring",
-        back="Pahtli Cape",waist="Fotia Belt",legs="Hagondes Pants +1",feet="Con. Pigaches +1"}
+        head="Buremte Hat",neck="Fotia Gorget",ear1="Bladeborn Earring",ear2="Steelflash Earring",
+        body="Helios Jacket",hands="Glyphic Bracers +1",ring1="Rajas Ring",ring2="K'ayres Ring",
+        back="Pahtli Cape",waist="Fotia Belt",legs="Telchine Braconi",feet="Con. Pigaches +1"}
 
     -- Specific weaponskill sets.  Uses the base set if an appropriate WSMod version isn't found.
     sets.precast.WS['Myrkr'] = {
-        head="Nahtirah Hat",ear1="Gifted Earring",ear2="Loquacious Earring",
-        body="Convoker's Doublet",hands="Caller's Bracers +2",ring1="Evoker's Ring",ring2="Sangoma Ring",
-        back="Pahtli Cape",waist="Fotia Belt",legs="Nares Trews",feet="Chelona Boots +1"}
+        head="Nahtirah Hat", neck="Fotia Gorget", ear1="Gifted Earring",ear2="Loquacious Earring",
+        body="Convoker's Doublet +1",hands="Glyphic Bracers +1",ring1="Evoker's Ring",ring2="Sangoma Ring",
+        back="Pahtli Cape",waist="Fotia Belt",legs="Glypic Spats +1",feet="Glyphic Pigaches +1"}
 
     sets.precast.WS['Garland of Bliss'] = {
-		head="Hagondes Hat +1",neck="Fotia Gorget",ear1="Strophadic Earring",ear2="Hecate's Earring",
-		body="Artsieq Jubbah",hands="Yaoyotl Gloves",ring1="Shiva Ring",ring2="Shiva Ring",
-		back="Pahtli Cape",waist="Fotia Belt",legs="Hagondes Pants +1",feet="Umbani Boots"}
+		head=gear.MAB_Head, neck="Fotia Gorget", ear1=gear.MAB_Ear1, ear2=gear.MAB_Ear2,
+		body=gear.MAB_Body, hands=gear.MAB_Hands, ring1=gear.MAB_Ring1, ring2=gear.MAB_Ring2,
+		back=gear.MAB_Back, waist="Fotia Belt", legs=gear.MAB_Legs, feet=gear.MAB_Feet}
     --------------------------------------
     -- Midcast sets
     --------------------------------------
 
     sets.midcast.FastRecast = {
-        head="Nahtirah Hat",ear2="Loquacious Earring",
-        body="Vanir Cotehardie",hands="Bokwus Gloves",ring1="Prolix Ring",
-        back="Swith Cape",waist="Witful Belt",legs="Hagondes Pants +1",feet="Hagondes Sabots +1"}
+        head=gear.FastCast_Head, neck=gear.FastCast_Neck, ear1=gear.FastCast_Ear1, ear2=gear.FastCast_Ear2,
+        body=gear.FastCast_Body, hands=gear.FastCast_Hands,ring1=gear.FastCast_Ring1, ring2=gear.FastCast_Ring2,
+        back=gear.FastCast_Back, waist=gear.FastCast_Waist, legs=gear.FastCast_Legs, feet=gear.FastCast_Feet}
 
     sets.midcast.Cure = {
         head="Buremte Hat",ear1="Gifted Earring",ear2="Loquacious Earring",
         body="Heka's Kalasiris",hands="Bokwus Gloves",ring1="Ephedra Ring",ring2="Ephedra Ring",
         back="Pahtli Cape",waist="Cascade Belt",legs="Assiduity pants +1",feet="Glyph. Pigaches +1"}
 	
-	sets.midcast['Enhancing Magic'] = {head="Umuthi Hat", neck="Colossus's Torque",
-	body=gear.Pet_Regen_Body,hands="Ayao's Gages",
-	waist="Cascade Belt",legs = "Shedir Seraweels"}
+	sets.midcast['Enhancing Magic'] = {
+		head="Umuthi Hat", neck="Colossus's Torque",
+		body=gear.Pet_Regen_Body, hands="Ayao's Gages",
+		waist="Cascade Belt", legs = "Shedir Seraweels"}
 
     sets.midcast.Stoneskin =  set_combine(sets.midcast['Enhancing Magic'], {neck="Stone Gorget",waist="Siegel Sash"})
 
     sets.midcast['Elemental Magic'] = {main="Nirvana",sub="Oneiros Grip",
-        head="Hagondes Hat +1",neck="Eddy Necklace",ear1="Strophadic Earring",ear2="Hecate's Earring",
-        body="Artsieq Jubbah",hands="Yaoyotl Gloves",ring1="Shiva Ring",ring2="Shiva Ring",
-        back="Toro Cape",waist=gear.ElementalBelt,legs="Hagondes Pants +1",feet="Umbani Boots"}
+        head=gear.MAB_Head, neck=gear.MAB_Neck, ear1=gear.MAB_Ear1, ear2=gear.MAB_Ear2,
+        body=gear.MAB_Body, hands=gear.MAB_Hands, ring1=gear.MAB_Ring1, ring2=gear.MAB_Ring2,
+        back=gear.MAB_Back, waist=gear.MAB_Waist, legs=gear.MAB_Legs, feet=gear.MAB_Feet}
 
     sets.midcast['Dark Magic'] = {main="Nirvana",sub="Oneiros Grip",
         head="Nahtirah Hat",neck="Aesir Torque",ear1="Lifestorm Earring",ear2="Psystorm Earring",
@@ -232,46 +399,55 @@ function init_gear_sets()
 
 
     -- Avatar pact sets.  All pacts are Ability type.
-    
+    --General Pact Sets
     sets.midcast.Pet.BloodPactWard = {main="Nirvana",ammo="Seraphicaller",
-        head="Convoker's Horn +1",neck="Caller's Pendant",ear1="Andoaa Earring",ear2="Smn. Earring",
-        body="Anhur Robe",hands="Glyphic Bracers +1",ring1="Evoker's Ring",ring2="Fervor Ring",
-        back="Conveyance Cape",waist="Cimmerian Sash",legs="Ngen Seraweels", feet="Mdk. Crackows +1"}
+        head=gear.Pet_SmnMagic_Head, neck=gear.Pet_SmnMagic_Neck, ear1=gear.Pet_SmnMagic_Ear1, ear2=gear.Pet_SmnMagic_Ear2,
+        body=gear.Pet_SmnMagic_Body, hands=gear.Pet_SmnMagic_Hands, ring1=gear.Pet_SmnMagic_Ring1,ring2=gear.Pet_SmnMagic_Ring2,
+        back=gear.Pet_SmnMagic_Back, waist=gear.Pet_SmnMagic_Waist, legs=gear.Pet_SmnMagic_Legs, feet=gear.Pet_SmnMagic_Feet}
 
     sets.midcast.Pet.DebuffBloodPactWard = {main="Nirvana",ammo="Seraphicaller",
-        head="Hagondes Hat +1",neck="Caller's Pendant",ear1="Andoaa Earring",ear2="Smn. Earring",
-        body="Anhur Robe",hands="Glyphic Bracers +1",ring1="Evoker's Ring",ring2="Fervor Ring",
-        back="Conveyance Cape",waist="Cimmerian Sash",legs=gear.Pet_MAcc_Legs,feet="Hagondes Sabots"}
-        
-    sets.midcast.Pet.DebuffBloodPactWard.Acc = sets.midcast.Pet.DebuffBloodPactWard
+        head=gear.Pet_MAcc_Head, neck=gear.Pet_MAcc_Neck, ear1=gear.Pet_MAcc_Ear1, ear2=gear.Pet_MAcc_Ear2,
+        body=gear.Pet_MAcc_Body, hands=gear.Pet_MAcc_Hands, ring1=gear.Pet_MAcc_Ring1, ring2=gear.Pet_MAcc_Ring2,
+        back=gear.Pet_MAcc_Back, waist=gear.Pet_MAcc_Waist, legs=gear.Pet_MAcc_Legs, feet=gear.Pet_MAcc_Feet}
     
-    sets.midcast.Pet.PhysicalBloodPactRage = {main="Nirvana",ammo="Seraphicaller",
-        head="Convoker's Horn +1",neck="Sacrifice Torque",ear1="Esper Earring",ear2="Domes. Earring",
-        body="Convoker's Doublet +1",hands="Auspex Gages",ring1="Evoker's Ring",ring2="Fervor Ring",
-        back="Conveyance Cape",waist="Mujin Obi",legs=gear.Pet_PAcc_Legs,feet="Convoker's Pigaches +1"}
-
-    sets.midcast.Pet.PhysicalBloodPactRage.Acc = set_combine(sets.midcast.Pet.PhysicalBloodPactRage, {hands="Glyphic Bracers +1",
-		feet="Hag. Sabots +1",legs=gear.Pet_PAcc_Legs})
+    sets.midcast.Pet.PhysicalBloodPactRage = {main="Nirvana", ammo="Seraphicaller",
+        head=gear.Pet_PAtt_Head, neck=gear.Pet_PAtt_Neck, ear1=gear.Pet_PAtt_Ear1, ear2=gear.Pet_PAtt_Ear2,
+        body=gear.Pet_PAtt_Body, hands=gear.Pet_PAtt_Hands, ring1=gear.Pet_PAtt_Ring1, ring2=gear.Pet_PAtt_Ring2,
+        back=gear.Pet_PAtt_Back, waist=gear.Pet_PAtt_Waist, legs=gear.Pet_PAtt_Legs, feet=gear.Pet_PAtt_Feet}
 		
-	sets.midcast.Pet['Flaming Crush']= {main="Nirvana",ammo="Seraphicaller",
-        head="Helios Band",neck="Sacrifice Torque",ear1="Esper Earring",ear2="Domes. Earring",
-        body="Convoker's Doublet +1",hands="Auspex Gages",ring1="Evoker's Ring",ring2="Fervor Ring",
-        back="Conveyance Cape",waist="Mujin Obi",legs=gear.Pet_PAcc_Legs,feet="Convoker's Pigaches +1"}
+	sets.midcast.Pet.PhysicalBloodPactRage.Mix = {
+	
+	
+	}
+
+    sets.midcast.Pet.PhysicalBloodPactRage.Acc = {main="Nirvana", ammo="Seraphicaller",
+        head=gear.Pet_PAcc_Head, neck=gear.Pet_PAcc_Neck, ear1=gear.Pet_PAcc_Ear1, ear2=gear.Pet_PAcc_Ear2,
+        body=gear.Pet_PAcc_Body, hands=gear.Pet_PAcc_Hands, ring1=gear.Pet_PAcc_Ring1, ring2=gear.Pet_PAcc_Ring2,
+        back=gear.Pet_PAcc_Back, waist=gear.Pet_PAcc_Waist, legs=gear.Pet_PAcc_Legs, feet=gear.Pet_PAcc_Feet}
 
     sets.midcast.Pet.MagicalBloodPactRage = {main="Nirvana",ammo="Seraphicaller",
-        head="Glyphic Horn +1",neck="Caller's Pendant",ear1="Esper Earring",ear2="Andoaa. Earring",
-        body="Convoker's Doublet +1",hands="Auspex Gages",ring1="Evoker's Ring",ring2="Fervor Ring",
-        back="Conveyance Cape",waist="Cimmerian Sash",legs=gear.Pet_MAcc_Legs,feet="Convoker's Pigaches +1"}
+        head=gear.Pet_MAtb_Head, neck=gear.Pet_MAtb_Neck, ear1=gear.Pet_MAtb_Ear1, ear2=gear.Pet_MAtb_Ear2,
+        body=gear.Pet_MAtb_Body, hands=gear.Pet_MAtb_Hands, ring1=gear.Pet_MAtb_Ring1, ring2=gear.Pet_MAtb_Ring2,
+        back=gear.Pet_MAtb_Back, waist=gear.Pet_MAtb_Waist, legs=gear.Pet_MAtb_Legs, feet=gear.Pet_MAtb_Feet}
 
-    sets.midcast.Pet.MagicalBloodPactRage.Acc = set_combine(sets.midcast.Pet.MagicalBloodPactRage, {head="Hagondes Hat +1",
-	hands="Glyphic Bracers +1",legs=gear.Pet_MAcc_Legs,feet="Hagondes Sabots"})
+    sets.midcast.Pet.MagicalBloodPactRage.Acc = sets.midcast.Pet.DebuffBloodPactWard
+	
+	--Singular Pacts Special Sets
+	
+	--Flaming Crush Set
+	sets.midcast.Pet['Flaming Crush']= {main="Nirvana",ammo="Seraphicaller",
+        head=gear.Pet_MAtb_Head, neck=gear.Pet_PAtt_Neck, ear1=gear.Pet_PAtt_Ear1,ear2=gear.Pet_PAtt_Ear2,
+        body=gear.Pet_MAtb_Body, hands=gear.Pet_MAtb_Hands, ring1=gear.Pet_MAtb_Ring1, ring2=gear.Pet_MAtb_Ring2,
+        back=gear.Pet_MAtb_Back, waist=gear.Pet_PAtt_Waist, legs=gear.Pet_PAcc_Legs, feet=gear.Pet_MAtb_Feet}
+	--For Atomos, uses MAcc set	
+	sets.midcast.Pet['Deconstruction'] = sets.midcast.Pet.DebuffBloodPactWard
 
 
     -- Spirits cast magic spells, which can be identified in standard ways.
     
     sets.midcast.Pet.WhiteMagic = {legs="Glyphic Spats +1"}
     
-    sets.midcast.Pet['Elemental Magic'] = set_combine(sets.midcast.Pet.MagicalBloodPactRage, {legs=gear.Pet_MAcc_Legs})
+    sets.midcast.Pet['Elemental Magic'] = set_combine(sets.midcast.Pet.MagicalBloodPactRage, {legs=gear.Pet_MAtb_Legs})
 
     sets.midcast.Pet['Elemental Magic'].Resistant = set_combine(sets.midcast.Pet.MagicalBloodPactRage.Acc, {legs=gear.Pet_MAcc_Legs})
 
@@ -282,10 +458,10 @@ function init_gear_sets()
     --------------------------------------
     
     -- Resting sets
-    sets.resting = {main="Nirvana", sub="Oneiros Grip",ammo="Seraphicaller",
-        head="Convoker's Horn +1",neck="Wiglen Gorget",ear1="Gifted Earring",ear2="Loquacious Earring",
-        body="Hagondes Coat +1",hands="Serpentes Cuffs",ring1="Sheltered Ring",ring2="Paguroidea Ring",
-        back="Conveyance Cape",waist="Fucho-no-Obi",legs="Assid. Pants +1",feet="Serpentes Sabots"}
+    sets.resting = {main=gear.Refresh_Club, sub=gear.Refresh_Shield, ammo="Seraphicaller",
+        head=gear.Refresh_Head, neck=gear.Refresh_Neck, ear1=gear.Refresh_Ear1, ear2=gear.Refresh_Ear2,
+        body=gear.Refresh_Body, hands=gear.Refresh_Hands, ring1=gear.Refresh_Ring1, ring2=gear.Refresh_Ring2,
+        back=gear.Refresh_Back, waist=gear.Refresh_Waist, legs=gear.Refresh_Legs, feet=gear.Refresh_Feet}
     
     -- Idle sets
     sets.idle = {main="Nirvana", sub="Oneiros Grip",ammo="Seraphicaller",
@@ -294,21 +470,22 @@ function init_gear_sets()
         back="Kumbira Cape",waist="Fucho-no-Obi",legs="Assid. Pants +1",feet="Convoker's Pigaches +1"}
 
     sets.idle.PDT = {main="Nirvana",sub="Oneiros Grip",ammo="Seraphicaller",
-        head="Hagondes Hat +1",neck="Twilight Torque",ear1="Gifted Earring",ear2="Loquacious Earring",
-        body="Hagondes Coat +1",hands="Otomi Gloves",ring1="Defending Ring",ring2="Dark Ring",
-        back="Kumbira Cape",waist="Fucho-no-Obi",legs="Hagondes Pants +1",feet="Hag. Sabots +1"}
+        head="Convoker's Horn +1",neck="Wiglen Gorget",ear1="Gifted Earring",ear2="Loquacious Earring",
+        body="Hagondes Coat +1",hands="Serpentes Cuffs",ring1="Sheltered Ring",ring2="Defending Ring",
+        back="Kumbira Cape",waist="Fucho-no-Obi",legs="Assid. Pants +1",feet="Convoker's Pigaches +1"}
 		
 	sets.idle.AFK = {main="Nirvana", sub="Oneiros Grip",ammo="Seraphicaller",
         head="Convoker's Horn +1",neck="Wiglen Gorget",ear1="Gifted Earring",ear2="Loquacious Earring",
         body="Hagondes Coat +1",hands="Serpentes Cuffs",ring1="Paguroidea Ring",ring2="Defending Ring",
         back="Kumbira Cape",waist="Fucho-no-Obi",legs="Assid. Pants +1",feet="Convoker's Pigaches +1"}
+		
+	sets.idle.NoTP = sets.resting
 
     -- perp costs:
     -- spirits: 7
     -- carby: 11 (5 with mitts)
     -- fenrir: 13
     -- others: 15
-    -- avatar's favor: -4/tick
     
     -- Max useful -perp gear is 1 less than the perp cost (can't be reduced below 1)
     -- Aim for -14 perp, and refresh in other slots.
@@ -324,9 +501,9 @@ function init_gear_sets()
     -- Can make due without either the head or the body, and use +refresh items in those slots.
     
     sets.idle.Avatar = {main="Nirvana",sub="Oneiros Grip",ammo="Seraphicaller",
-        head="Convoker's Horn +1",neck="Caller's Pendant",ear1="Gifted Earring",ear2="Loquacious Earring",
-        body="Hagondes Coat +1",hands="Serpentes Cuffs",ring1="Evoker's Ring",ring2="Sheltered Ring",
-        back="Kumbira Cape",waist="Fucho-no-Obi",legs="Assid. Pants +1",feet="Convoker's Pigaches +1"}
+        head="Convoker's Horn +1", neck="Caller's Pendant", ear1="Gifted Earring", ear2="Loquacious Earring",
+        body="Hagondes Coat +1", hands=gear.Refresh_Hands, ring1="Evoker's Ring", ring2="Sheltered Ring",
+        back="Kumbira Cape", waist="Fucho-no-Obi", legs="Assid. Pants +1", feet=gear.Perp_Feet}
 
     sets.idle.PDT.Avatar = {main="Nirvana",sub="Oeniros Grip",ammo="Seraphicaller",
         head="Convoker's Horn +1",neck="Caller's Pendant",ear1="Gifted Earring",ear2="Loquacious Earring",
@@ -334,6 +511,11 @@ function init_gear_sets()
         back="Kumbira Cape",waist="Fucho-no-Obi",legs="Assid. Pants +1",feet="Convoker's Pigaches +1"}
 
     sets.idle.Spirit = {main="Nirvana",sub="Oneiros Grip",ammo="Seraphicaller",
+        head="Convoker's Horn +1",neck="Caller's Pendant",ear1="Anodaa Earring",ear2="Smn. Earring",
+        body="Anhur Robe",hands="Glyphic Bracers +1",ring1="Evoker's Ring",ring2="Fevor Ring",
+        back="Conveyance Cape",waist="Cimmerian Sash",legs="Glyphic Spats +1",feet="Mdk. Crackows +1"}
+		
+	sets.idle.PDT.Spirit = {main="Nirvana",sub="Oneiros Grip",ammo="Seraphicaller",
         head="Convoker's Horn +1",neck="Caller's Pendant",ear1="Anodaa Earring",ear2="Smn. Earring",
         body="Anhur Robe",hands="Glyphic Bracers +1",ring1="Evoker's Ring",ring2="Fevor Ring",
         back="Conveyance Cape",waist="Cimmerian Sash",legs="Glyphic Spats +1",feet="Mdk. Crackows +1"}
@@ -345,14 +527,17 @@ function init_gear_sets()
 
     -- Favor uses Caller's Horn instead of Convoker's Horn for refresh
     sets.idle.Avatar.Favor = {head="Caller's Horn +2"}
+	--Sets to be used while only Avatar is engaged
+	sets.idle.Avatar.Melee = {
+		head="Con. Horn +1", neck="Caller's Pendant",ear1="Handler's Earring",ear2="Domes. Earring",
+		body="Glyphic Doublet +1",hands="Artsieq Cuffs",ring1="Evoker's Ring",
+		back="Conveyance Cape",waist="Moepapa Stone",legs="Con. Spats +1", feet="Con. Pigaches +1"}
 	
-	sets.idle.Avatar.Melee = {head="Con. Horn +1", neck="Caller's Pendant",ear1="Handler's Earring",ear2="Domes. Earring",
-	body="Glyphic Doublet +1",hands="Artsieq Cuffs",ring1="Evoker's Ring",
-	back="Conveyance Cape",waist="Moepapa Stone",legs="Con. Spats +1", feet="Con. Pigaches +1"}
+	sets.idle.PDT.Avatar.Melee = {
+		head="Selenian Cap", neck="Caller's Pendant",ear1="Handler's Earring",ear2="Domes. Earring",
+		body="Telchine Chasuble",hands="Artsieq Cuffs",ring1="Evoker's Ring",
+		back="Conveyance Cape",waist="Isa Belt",legs="Telchine braconi", feet="Con. Pigaches +1"}
 	
-	sets.idle.PDT.Avatar.Melee = {head="Selenian Cap", neck="Caller's Pendant",ear1="Handler's Earring",ear2="Domes. Earring",
-	body="Telchine Chasuble",hands="Artsieq Cuffs",ring1="Evoker's Ring",
-	back="Conveyance Cape",waist="Isa Belt",legs="Telchine braconi", feet="Con. Pigaches +1"}
         
     sets.perp = {}
     -- Caller's Bracer's halve the perp cost after other costs are accounted for.
@@ -362,8 +547,10 @@ function init_gear_sets()
     sets.perp.Day = {}
     sets.perp.Weather = {}
     -- Carby: Mitts+Conv.feet = 1/tick perp.  Everything else should be +refresh
-    sets.perp.Carbuncle = {main="Nirvana",sub="Oneiros Grip",
-        head="Convoker's Horn +1",body="Hagondes Coat +1",hands="Serpentes Cuffs",legs="Assid. Pants",feet="Serpentes Sabots"}
+    sets.perp.Carbuncle = {main="Nirvana", sub="Oneiros Grip",
+        head="Convoker's Horn +1",
+		body="Hagondes Coat +1",hands="Serpentes Cuffs",
+		legs="Assid. Pants",feet="Serpentes Sabots"}
     -- Diabolos's Rope doesn't gain us anything at this time
     --sets.perp.Diabolos = {waist="Diabolos's Rope"}
     sets.perp.Alexander = set_combine(sets.midcast.Pet.BloodPactWard, {legs='Ngen Seraweels', feet='Mdk. Crackows +1'})
@@ -404,6 +591,26 @@ end
 -- Set eventArgs.handled to true if we don't want any automatic gear equipping to be done.
 -- Set eventArgs.useMidcastGear to true if we want midcast gear equipped on precast.
 function job_precast(spell, action, spellMap, eventArgs)
+	--Allow equipment that will cause tp lose to be changed
+	--For Nirvana people that want to be able to switch into full mage mode when need, Use IdleMode NoTP
+	if state.IdleMode.current == 'NoTP' and state.NoTP == false then 
+		
+		send_command('gs enable Main')
+		send_command('gs enable Sub')
+		send_command('gs enable Range')
+		
+		state.NoTP = true
+	
+	elseif state.IdleMode.current ~= 'NoTP' and state.NoTP == true then
+	
+		send_command('gs disable Main')
+		send_command('gs disable Sub')
+		send_command('gs disable Range')
+		
+		state.NoTP = false
+		
+	end
+	
     if state.Buff['Astral Conduit'] and pet_midaction() then
         eventArgs.handled = true
     end
@@ -425,6 +632,7 @@ function job_pet_aftercast(spell, action, spellMap, eventArgs)
         wards.spell = spell.english
         send_command('wait 4; gs c reset_ward_flag')
     end
+	
 end
 
 -------------------------------------------------------------------------------------------------------------------
@@ -435,34 +643,70 @@ end
 -- buff == buff gained or lost
 -- gain == true if the buff was gained, false if it was lost.
 function job_buff_change(buff, gain)
-    local command = ''
+    --Set Avatar's favor into command
+	local command = ''
 	command = command..'wait 1.1;input /ja "'.."Avatar's Favor"..'" <me>'
+	
     if state.Buff[buff] ~= nil then
         handle_equipping_gear(player.status)
     elseif storms:contains(buff) then
         handle_equipping_gear(player.status)
     end
+	
+	--This will attempt to keep you alive while AFK, Mainly used with Garuda
 	if state.IdleMode.current == 'AFK' then
-		if buff == 'Blink' and not gain then
-			send_command('wait 2;gs c pact buffdefense')
-			send_command('wait 8;gs c pact bp70')
+		
+		if pet.name == 'Garuda' then
+			if buff == 'Blink' and not gain then
+				send_command('wait 2;gs c pact buffdefense')
+				send_command('wait 8;gs c pact bp70')
+			end
+		
+			if not buffactive['Haste'] then
+				send_command('wait 2;gs c pact buffoffense')
+				send_command('wait 7;gs c pact bp70')
+			end
+			if not buffactive['Blink'] then
+				send_command('wait 2;gs c pact buffdefense')
+			end
 		end
 		
-		if not buffactive["Avatar's Favor"] then
-			send_command(command)
+		if pet.name == 'Ifrit' then
+			
+			if not buffactive['Enfire'] then
+				send_command('wait 2;input /pet "Inferno Howl" <me>')
+			end
+			
+			if not buffactive['Aquaveil'] then
+				send_command('input /ma "Aquaveil" <me>')
+			end
+			
+			if not buffactive['Blink'] then
+				send_command('input /ma "Blink" <me>')
+			end
+			
+			if not buffactive['Stoneskin'] then
+				send_command('wait 6;input /ma "Stoneskin" <me>')
+			end
+			send_command('wait 7;input /pet "Flaming Crush" <bt>')
+		
 		end
 		
-		if not buffactive['Haste'] then
-			send_command('wait 2;gs c pact buffoffense')
-			send_command('wait 7;gs c pact bp70')
-		end
-		if not buffactive['Blink'] then
-			send_command('wait 2;gs c pact buffdefense')
-		end
 		if not buffactive['Protect'] then
 			send_command('input /ma "Protect III" <me>')
 			send_command('wait 5;input /ma "Shell II" <me>')
 		end
+		
+		--Reactivates Avatar's Favor if AFK
+		if not buffactive["Avatar's Favor"] then
+			send_command(command)
+		end
+		
+		
+		if buffactive["Quickening"] then
+			send_command("/equip legs 'Tatsu. Sitagoromo'")
+		end
+		
 		
 	end
 end
@@ -474,18 +718,39 @@ function job_pet_status_change(newStatus, oldStatus, eventArgs)
     if pet.isvalid and not midaction() and not pet_midaction() and (newStatus == 'Engaged' or oldStatus == 'Engaged') then
         handle_equipping_gear(player.status, newStatus)
     end
+	--This will attempt to keep you alive while AFK, Mainly Used with Garuda
 	if state.IdleMode.current == 'AFK' then
-		send_command('wait 7;gs c pact bp70')
-		send_command('input /pet "Predator Claws" <bt>')
-		if not buffactive['Blink'] then
-			send_command('wait 7;gs c pact buffdefense')
+		if pet.name == 'Garuda' then
+			send_command('wait 7;gs c pact bp70')
 			send_command('input /pet "Predator Claws" <bt>')
-		end
+			if not buffactive['Blink'] then
+				send_command('wait 7;gs c pact buffdefense')
+				send_command('input /pet "Predator Claws" <bt>')
+			end
 		
 	
-		if pet.hpp < 80 or player.hpp < 80 then
-			send_command('wait 1;input /pet "Whispering Wind" <me>')
+			if pet.hpp < 80 or player.hpp < 80 then
+				send_command('wait 1;input /pet "Whispering Wind" <me>')
+			end
 		end
+		
+		if pet.name == 'Ifrit' then
+		
+			if pet.status == 'Engaged' then
+				if not buffactive['Warcry'] then
+					send_command('wait 1;input /pet "Crimson Howl" <me>')
+				end
+				send_command('wait 8;input /pet "Flaming Crush" <bt>')
+			end
+			
+		end
+		
+		if not pet.isvalid then
+			send_command('wait 4;input /ma "Ifrit" <me>')
+		end
+		
+		
+		
 	end
 end
 
@@ -504,6 +769,7 @@ function job_pet_change(petparam, gain)
     else
         --select_default_macro_book('reset')
     end
+	
 end
 
 -------------------------------------------------------------------------------------------------------------------
@@ -539,34 +805,42 @@ function customize_idle_set(idleSet)
         --if gear.perp_staff.name and (player.inventory[gear.perp_staff.name] or player.wardrobe[gear.perp_staff.name]) then
           --  idleSet = set_combine(idleSet, sets.perp.staff_and_grip)
         --end
-		
+		--Activate's Avatar's Favor if it is not up when you enter your IdleSet
 		if not buffactive["Avatar's Favor"] then
 			send_command("input /ja 'Avatars Favor' <me>;")
 		end
-		
+		--Equip's Caller's Horn +2 if Favor is up and Idling 
         if state.Buff["Avatar's Favor"] and avatars:contains(pet.name) then
             idleSet = set_combine(idleSet, sets.idle.Avatar.Favor)
         end
+		--Changes Idle set when only Avatar is Attacking and Idle Set is set to appropriate setting
         if pet.status == 'Engaged' then
-			send_command("/input /ja 'Avatars Favor' <me>;")
 			if state.IdleMode.current == 'PDT' then
 				idleSet = sets.idle.PDT.Avatar.Melee
 			elseif state.IdleMode.current == 'Att' then
 				idleSet = sets.idle.Avatar.Melee
-			
+			elseif state.IdleMode.current == 'AFK' and pet.name == 'Ifrit' then
+				idleSet = sets.idle.PDT.Avatar.Melee
 			end
 		end
+		--Regen Pet Belt if pet is out
+		if player.mpp > 51 and pet.hpp < 100 then
+			idleSet = set_combine(idleSet, {waist=gear.Pet_Regen_Waist})
+		end
 		
-		--if player.mpp > 95 then
-		--idleSet = set_combine(idleSet, {legs='Helios Spats'})
-		--end
+		if state.IdleMode.current == 'AFK' and pet.name == 'Ifrit' and pet.status ~= 'Engaged' and pet.hpp < 80 then
+	
+			idleSet = set_combine(idleSet, {waist=gear.Pet_Regen_Waist, hands=gear.Pet_Regen_Hands, legs=gear.Pet_Regen_Legs})
+	
+		end
     end
-    
+    --Latent Refresh Belt
     if player.mpp < 51 then
         idleSet = set_combine(idleSet, sets.latent_refresh)
     end
-	
     
+	
+	
     return idleSet
 end
 
@@ -754,8 +1028,8 @@ function handle_pacts(cmdParams)
     end
 
     if not pet.isvalid then
-        add_to_chat(122,'No avatar currently available. Returning to default macro set.')
-        select_default_macro_book('reset')
+        add_to_chat(122,'No avatar currently available.')
+        --select_default_macro_book('reset')
         return
     end
 
